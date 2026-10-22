@@ -2,7 +2,7 @@
 
 **Uncertainty-aware evidence evaluation and abstention for retrieval-augmented generation.**
 
-> **Project status: Phase 1 (foundation only).**
+> **Project status: Phase 2 (dataset layer).**
 > No benchmark results, retrieval baselines, abstention models, or dashboard
 > results exist yet. Claims in this repository will distinguish measured findings
 > from planned work.
@@ -30,9 +30,9 @@ planned system separates:
 The core benchmark is designed to run without paid APIs, and offline tests do
 not require dataset or model downloads.
 
-## Current implementation (Phase 1)
+## Current implementation (Phases 1-2)
 
-Phase 1 provides only the project foundation:
+Phase 1 provides the project foundation:
 
 - strict YAML experiment configuration with validation;
 - consistent package logging;
@@ -40,11 +40,21 @@ Phase 1 provides only the project foundation:
   - `ANSWER_SUPPORTED`
   - `INSUFFICIENT_EVIDENCE`
   - `CONFLICTING_EVIDENCE`;
-- deterministic seed derivation utilities;
-- offline unit tests for the foundation above.
+- deterministic seed derivation utilities.
 
-Dataset adapters, retrieval, evidence assessment, experiments, results, and the
-dashboard are intentionally not implemented yet.
+Phase 2 provides the data layer:
+
+- validated document, query, relevance, dataset, and evidence-scenario models;
+- a strict BEIR loader and a SciFact wrapper;
+- deterministic query-level train/validation/test splits;
+- controlled transformations for missing, irrelevant, contradictory, and
+  outdated evidence;
+- stable provenance and example IDs for original versus transformed scenarios;
+- a small fictional fixture for offline tests.
+
+Retrieval, evidence assessment, experiments, results, and the dashboard are
+intentionally not implemented yet. See `docs/data.md` for schema details, label
+semantics, transformation assumptions, and limitations.
 
 ## Planned project layout
 
@@ -139,7 +149,7 @@ python -m mypy src
 
 ## Configuration
 
-Phase 1 includes a strict smoke configuration at `configs/smoke.yaml`:
+The project includes a strict smoke configuration at `configs/smoke.yaml`:
 
 ```yaml
 version: 1
@@ -164,11 +174,14 @@ The planned public benchmark is **SciFact** (Wadden et al., EMNLP 2020):
 - The BEIR redistribution is listed as **CC BY-SA 4.0**.
 - Dataset terms are separate from the project's source-code license.
 - No SciFact data is bundled in this repository.
-- Download scripts and checksum-verified instructions will be added in Phase 2.
-- Offline tests will use a small synthetic fixture and will not require the
-  dataset.
+- `datasets/README.md` contains manual acquisition instructions, the BEIR archive
+  checksum, and expected layout. Nothing is downloaded automatically.
+- The loader validates local files but does not fetch them.
+- Offline tests use a small synthetic fixture and do not require the dataset.
 - Users are responsible for confirming that their intended use complies with the
   applicable dataset license terms.
+
+See `docs/data.md` for label semantics and controlled-scenario limitations.
 
 Citation:
 

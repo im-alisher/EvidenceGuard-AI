@@ -9,3 +9,7 @@ class EvidenceGuardError(Exception):
 
 class ConfigError(EvidenceGuardError):
     """Raised when a configuration file is missing, malformed, or invalid."""
+
+
+class DataValidationError(EvidenceGuardError):
+    """Raised when a dataset or benchmark transformation is invalid."""
