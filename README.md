@@ -2,11 +2,11 @@
 
 **Uncertainty-aware evidence evaluation and abstention for retrieval-augmented generation.**
 
-> **Project status: Phase 4 (retrieval evaluation).**
-> Retrieval baselines and offline retrieval metrics are implemented. No SciFact
-> benchmark results, evidence assessment, abstention models, or dashboard results
-> exist yet. Claims in this repository will distinguish measured findings from
-> planned work.
+> **Project status: Phase 5 (evidence assessment).**
+> Retrieval baselines, offline retrieval metrics, and a label-driven evidence
+> assessment policy are implemented. No SciFact benchmark results, abstention
+> models, or dashboard results exist yet. Claims in this repository will
+> distinguish measured findings from planned work.
 
 ## Research question
 
@@ -31,7 +31,7 @@ planned system separates:
 The core benchmark is designed to run without paid APIs, and offline tests do
 not require dataset or model downloads.
 
-## Current implementation (Phases 1-4)
+## Current implementation (Phases 1-5)
 
 Phase 1 provides the project foundation:
 
@@ -69,10 +69,21 @@ Phase 4 provides retrieval evaluation:
 - validation of result order, duplicate documents, and corpus membership;
 - JSON-serializable evaluation output for later experiment reporting.
 
-Evidence assessment, calibration, experiments, results, and the dashboard are
-intentionally not implemented yet. See `docs/data.md` for dataset semantics,
-`docs/retrieval.md` for retriever interfaces, and `docs/evaluation.md` for metric
-definitions and limitations.
+Phase 5 provides evidence assessment:
+
+- a validated supporting, contradicting, neutral, and unknown stance taxonomy;
+- a batch classifier interface plus an explicit metadata-label adapter;
+- deterministic support/conflict/insufficiency decisions;
+- strict validation of classifier output and document membership;
+- JSON-serializable evidence assessments for later evaluation.
+
+The phase does not perform automatic natural-language inference. Stance labels
+must be supplied by an annotator or an external classifier, and decision
+strengths are not calibrated. Calibration, experiments, results, and the
+dashboard are intentionally not implemented yet. See `docs/data.md` for dataset
+semantics, `docs/retrieval.md` for retriever interfaces, `docs/evaluation.md`
+for metric definitions, and `docs/evidence.md` for evidence-assessment
+semantics and limitations.
 
 ## Planned project layout
 
