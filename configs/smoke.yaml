@@ -1,0 +1,8 @@
+version: 1
+name: smoke
+seed: 13
+paths:
+  datasets: datasets
+  outputs: reports/runs
+logging:
+  level: INFO
