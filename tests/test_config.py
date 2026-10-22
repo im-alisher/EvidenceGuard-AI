@@ -9,6 +9,7 @@ import yaml
 from evidenceguard.config import (
     CONFIG_VERSION,
     ExperimentConfig,
+    ExperimentSpec,
     load_experiment_config,
 )
 from evidenceguard.errors import ConfigError
@@ -153,4 +154,152 @@ def test_invalid_log_level_is_rejected(tmp_path: Path) -> None:
     path = _write_config(tmp_path, data)
 
     with pytest.raises(ConfigError, match="logging.level"):
+        load_experiment_config(path, base_dir=tmp_path)
+
+
+def test_experiment_section_is_optional(tmp_path: Path) -> None:
+    path = _write_config(tmp_path, _valid_config())
+
+    config = load_experiment_config(path, base_dir=tmp_path)
+
+    assert config.experiment is None
+
+
+def test_loads_and_normalizes_experiment_section(tmp_path: Path) -> None:
+    data = _valid_config()
+    data["experiment"] = {
+        "dataset": "data/fixture",
+        "retriever": "BM25",
+        "cutoffs": [10, 1, 5],
+        "top_k": 10,
+    }
+    path = _write_config(tmp_path, data)
+
+    config = load_experiment_config(path, base_dir=tmp_path)
+
+    assert isinstance(config.experiment, ExperimentSpec)
+    assert config.experiment.dataset == (tmp_path / "data" / "fixture").resolve()
+    assert config.experiment.retriever == "bm25"
+    assert config.experiment.cutoffs == (1, 5, 10)
+    assert config.experiment.top_k == 10
+
+
+def test_loads_retrieval_smoke_config_from_repository_root() -> None:
+    repository_root = Path(__file__).resolve().parents[1]
+
+    config = load_experiment_config(
+        repository_root / "configs" / "retrieval-smoke.yaml",
+        base_dir=repository_root,
+    )
+
+    assert config.experiment is not None
+    assert config.experiment.dataset == (
+        repository_root / "tests" / "fixtures" / "mini_beir"
+    ).resolve()
+    assert config.experiment.cutoffs == (1, 3)
+    assert config.experiment.top_k == 3
+
+
+@pytest.mark.parametrize("missing_key", ["dataset", "retriever", "cutoffs", "top_k"])
+def test_experiment_required_keys_are_enforced(
+    tmp_path: Path,
+    missing_key: str,
+) -> None:
+    data = _valid_config()
+    data["experiment"] = {
+        "dataset": "data/fixture",
+        "retriever": "bm25",
+        "cutoffs": [1],
+        "top_k": 1,
+    }
+    del data["experiment"][missing_key]
+    path = _write_config(tmp_path, data)
+
+    with pytest.raises(ConfigError, match="Missing required key"):
+        load_experiment_config(path, base_dir=tmp_path)
+
+
+def test_experiment_unknown_key_is_rejected(tmp_path: Path) -> None:
+    data = _valid_config()
+    data["experiment"] = {
+        "dataset": "data/fixture",
+        "retriever": "bm25",
+        "cutoffs": [1],
+        "top_k": 1,
+        "unexpected": True,
+    }
+    path = _write_config(tmp_path, data)
+
+    with pytest.raises(ConfigError, match="Unknown key"):
+        load_experiment_config(path, base_dir=tmp_path)
+
+
+@pytest.mark.parametrize("retriever", ["dense", "hybrid", ""])
+def test_experiment_rejects_unsupported_retriever(
+    tmp_path: Path,
+    retriever: str,
+) -> None:
+    data = _valid_config()
+    data["experiment"] = {
+        "dataset": "data/fixture",
+        "retriever": retriever,
+        "cutoffs": [1],
+        "top_k": 1,
+    }
+    path = _write_config(tmp_path, data)
+
+    with pytest.raises(ConfigError, match="retriever"):
+        load_experiment_config(path, base_dir=tmp_path)
+
+
+@pytest.mark.parametrize(
+    "cutoffs",
+    ["1", [], [0], [-1], [True], [1, 1], [1, "2"]],
+)
+def test_experiment_rejects_invalid_cutoffs(
+    tmp_path: Path,
+    cutoffs: object,
+) -> None:
+    data = _valid_config()
+    data["experiment"] = {
+        "dataset": "data/fixture",
+        "retriever": "bm25",
+        "cutoffs": cutoffs,
+        "top_k": 10,
+    }
+    path = _write_config(tmp_path, data)
+
+    with pytest.raises(ConfigError, match="cutoffs"):
+        load_experiment_config(path, base_dir=tmp_path)
+
+
+@pytest.mark.parametrize("top_k", [0, -1, True, "3"])
+def test_experiment_rejects_invalid_top_k(
+    tmp_path: Path,
+    top_k: object,
+) -> None:
+    data = _valid_config()
+    data["experiment"] = {
+        "dataset": "data/fixture",
+        "retriever": "bm25",
+        "cutoffs": [1],
+        "top_k": top_k,
+    }
+    path = _write_config(tmp_path, data)
+
+    with pytest.raises(ConfigError, match="top_k"):
+        load_experiment_config(path, base_dir=tmp_path)
+
+
+def test_experiment_requires_top_k_at_least_max_cutoff(tmp_path: Path) -> None:
+    data = _valid_config()
+    data["experiment"] = {
+        "dataset": "data/fixture",
+        "retriever": "bm25",
+        "cutoffs": [1, 5],
+        "top_k": 3,
+    }
+    path = _write_config(tmp_path, data)
+
+    with pytest.raises(ConfigError, match="top_k"):
         load_experiment_config(path, base_dir=tmp_path)

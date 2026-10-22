@@ -21,3 +21,11 @@ class OptionalDependencyError(EvidenceGuardError):
 
 class EvaluationError(EvidenceGuardError):
     """Raised when retrieval or benchmark evaluation cannot be performed."""
+
+
+class ExperimentError(EvidenceGuardError):
+    """Raised when an experiment cannot be configured, run, or written."""
+
+
+class ReportError(EvidenceGuardError):
+    """Raised when a run artifact cannot be loaded or rendered."""

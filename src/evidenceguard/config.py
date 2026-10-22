@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final
@@ -16,9 +16,13 @@ CONFIG_VERSION: Final = 1
 _NAME_PATTERN: Final = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _LOG_LEVELS: Final = frozenset({"CRITICAL", "DEBUG", "ERROR", "INFO", "WARNING"})
 
-_TOP_LEVEL_KEYS: Final = frozenset({"logging", "name", "paths", "seed", "version"})
+_REQUIRED_TOP_LEVEL_KEYS: Final = frozenset(
+    {"logging", "name", "paths", "seed", "version"}
+)
+_ALLOWED_TOP_LEVEL_KEYS: Final = _REQUIRED_TOP_LEVEL_KEYS | {"experiment"}
 _PATH_KEYS: Final = frozenset({"datasets", "outputs"})
 _LOGGING_KEYS: Final = frozenset({"level"})
+_EXPERIMENT_KEYS: Final = frozenset({"cutoffs", "dataset", "retriever", "top_k"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +41,16 @@ class LoggingConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class ExperimentSpec:
+    """Optional retrieval experiment selected by a configuration."""
+
+    dataset: Path
+    retriever: str
+    cutoffs: tuple[int, ...]
+    top_k: int
+
+
+@dataclass(frozen=True, slots=True)
 class ExperimentConfig:
     """Validated configuration for one reproducible experiment."""
 
@@ -45,6 +59,7 @@ class ExperimentConfig:
     seed: int
     paths: PathsConfig
     logging: LoggingConfig
+    experiment: ExperimentSpec | None = None
 
 
 def load_experiment_config(
@@ -63,7 +78,7 @@ def load_experiment_config(
     resolved_base_dir = resolved_base_dir.resolve()
 
     raw = _load_yaml_mapping(config_path)
-    _check_keys(raw, _TOP_LEVEL_KEYS, "configuration")
+    _check_root_keys(raw)
 
     version = _expect_int(raw["version"], "version")
     if version != CONFIG_VERSION:
@@ -84,6 +99,11 @@ def load_experiment_config(
 
     paths = _parse_paths(raw["paths"], resolved_base_dir)
     logging_config = _parse_logging(raw["logging"])
+    experiment = (
+        _parse_experiment(raw["experiment"], resolved_base_dir)
+        if "experiment" in raw
+        else None
+    )
 
     return ExperimentConfig(
         version=version,
@@ -91,6 +111,7 @@ def load_experiment_config(
         seed=seed,
         paths=paths,
         logging=logging_config,
+        experiment=experiment,
     )
 
 
@@ -117,6 +138,52 @@ def _parse_paths(value: object, base_dir: Path) -> PathsConfig:
     datasets = _resolve_path(_expect_string(mapping["datasets"], "paths.datasets"), base_dir)
     outputs = _resolve_path(_expect_string(mapping["outputs"], "paths.outputs"), base_dir)
     return PathsConfig(datasets=datasets, outputs=outputs)
+
+
+def _parse_experiment(value: object, base_dir: Path) -> ExperimentSpec:
+    mapping = _expect_mapping(value, "experiment")
+    _check_keys(mapping, _EXPERIMENT_KEYS, "experiment")
+
+    dataset = _resolve_path(
+        _expect_string(mapping["dataset"], "experiment.dataset"),
+        base_dir,
+    )
+    retriever = _expect_string(mapping["retriever"], "experiment.retriever").lower()
+    if retriever != "bm25":
+        raise ConfigError("experiment.retriever currently supports only 'bm25'.")
+    cutoffs = _expect_cutoffs(mapping["cutoffs"])
+    top_k = _expect_int(mapping["top_k"], "experiment.top_k")
+    if top_k < 1:
+        raise ConfigError("experiment.top_k must be a positive integer.")
+    if top_k < cutoffs[-1]:
+        raise ConfigError(
+            "experiment.top_k must be greater than or equal to every cutoff."
+        )
+    return ExperimentSpec(
+        dataset=dataset,
+        retriever=retriever,
+        cutoffs=cutoffs,
+        top_k=top_k,
+    )
+
+
+def _expect_cutoffs(value: object) -> tuple[int, ...]:
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
+        raise ConfigError("experiment.cutoffs must be a non-empty sequence.")
+    values = tuple(value)
+    if not values:
+        raise ConfigError("experiment.cutoffs must be a non-empty sequence.")
+    cutoffs: list[int] = []
+    for item in values:
+        cutoff = _expect_int(item, "experiment.cutoffs item")
+        if cutoff < 1:
+            raise ConfigError(
+                "experiment.cutoffs must contain only positive integers."
+            )
+        cutoffs.append(cutoff)
+    if len(set(cutoffs)) != len(cutoffs):
+        raise ConfigError("experiment.cutoffs must not contain duplicates.")
+    return tuple(sorted(cutoffs))
 
 
 def _parse_logging(value: object) -> LoggingConfig:
@@ -152,6 +219,17 @@ def _expect_int(value: object, where: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ConfigError(f"{where} must be an integer.")
     return value
+
+
+def _check_root_keys(mapping: Mapping[str, Any]) -> None:
+    missing = sorted(_REQUIRED_TOP_LEVEL_KEYS.difference(mapping))
+    if missing:
+        raise ConfigError(
+            f"Missing required key(s) in configuration: {', '.join(missing)}."
+        )
+    unknown = sorted(set(mapping).difference(_ALLOWED_TOP_LEVEL_KEYS))
+    if unknown:
+        raise ConfigError(f"Unknown key(s) in configuration: {', '.join(unknown)}.")
 
 
 def _check_keys(mapping: Mapping[str, Any], expected: frozenset[str], where: str) -> None:

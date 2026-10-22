@@ -2,11 +2,12 @@
 
 **Uncertainty-aware evidence evaluation and abstention for retrieval-augmented generation.**
 
-> **Project status: Phase 6 (abstention and selective risk).**
-> Retrieval, evidence assessment, thresholded abstention, and decision
-> evaluation are implemented. No SciFact benchmark results, experiment runs,
-> or dashboard results exist yet. Claims in this repository will distinguish
-> measured findings from planned work.
+> **Project status: Phase 7 (experiment runner).**
+> Retrieval, evidence assessment, thresholded abstention, decision
+> evaluation, and configuration-driven retrieval runs are implemented. No
+> SciFact benchmark results, reporting outputs, or dashboard results exist yet.
+> Claims in this repository will distinguish measured findings from planned
+> work.
 
 ## Research question
 
@@ -31,7 +32,7 @@ planned system separates:
 The core benchmark is designed to run without paid APIs, and offline tests do
 not require dataset or model downloads.
 
-## Current implementation (Phases 1-6)
+## Current implementation (Phases 1-7)
 
 Phase 1 provides the project foundation:
 
@@ -92,11 +93,22 @@ Phase 6 provides abstention and decision evaluation:
 
 Threshold selection requires development data; no threshold has been fitted on
 SciFact, and confidence values are not claimed to be calibrated probabilities.
-Experiment orchestration, reporting, and the dashboard are intentionally not
-implemented yet. See `docs/data.md` for dataset semantics, `docs/retrieval.md`
-for retriever interfaces, `docs/evaluation.md` for retrieval metrics,
-`docs/evidence.md` for evidence-assessment semantics, and
-`docs/uncertainty.md` for abstention and calibration limitations.
+
+Phase 7 provides reproducible experiment orchestration:
+
+- an optional strict `experiment` configuration section for local BEIR runs;
+- BM25 experiment execution over caller-provided local datasets;
+- versioned JSON artifacts containing retrieval results and optional decision
+  and calibration outputs;
+- deterministic artifact writing with explicit overwrite protection;
+- a `python -m evidenceguard.experiments` command-line entry point.
+
+Reporting and the dashboard are intentionally not implemented yet. See
+`docs/data.md` for dataset semantics, `docs/retrieval.md` for retriever
+interfaces, `docs/evaluation.md` for retrieval metrics, `docs/evidence.md` for
+evidence-assessment semantics, `docs/uncertainty.md` for abstention and
+calibration limitations, and `docs/experiments.md` for run configuration and
+artifact schemas.
 
 ## Planned project layout
 
@@ -207,6 +219,16 @@ logging:
 Relative paths are resolved against the working directory by default, or
 against an explicit `base_dir` passed to `load_experiment_config`. Unknown keys
 and unsupported versions are rejected rather than silently ignored.
+
+`configs/retrieval-smoke.yaml` adds an optional retrieval experiment over the
+synthetic fixture. Run it after installation with:
+
+```powershell
+python -m evidenceguard.experiments configs/retrieval-smoke.yaml
+```
+
+The command writes a JSON artifact under `reports/runs/`. It does not download
+data or models.
 
 ## Dataset and licensing
 
