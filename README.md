@@ -2,11 +2,11 @@
 
 **Uncertainty-aware evidence evaluation and abstention for retrieval-augmented generation.**
 
-> **Project status: Phase 5 (evidence assessment).**
-> Retrieval baselines, offline retrieval metrics, and a label-driven evidence
-> assessment policy are implemented. No SciFact benchmark results, abstention
-> models, or dashboard results exist yet. Claims in this repository will
-> distinguish measured findings from planned work.
+> **Project status: Phase 6 (abstention and selective risk).**
+> Retrieval, evidence assessment, thresholded abstention, and decision
+> evaluation are implemented. No SciFact benchmark results, experiment runs,
+> or dashboard results exist yet. Claims in this repository will distinguish
+> measured findings from planned work.
 
 ## Research question
 
@@ -31,7 +31,7 @@ planned system separates:
 The core benchmark is designed to run without paid APIs, and offline tests do
 not require dataset or model downloads.
 
-## Current implementation (Phases 1-5)
+## Current implementation (Phases 1-6)
 
 Phase 1 provides the project foundation:
 
@@ -79,11 +79,24 @@ Phase 5 provides evidence assessment:
 
 The phase does not perform automatic natural-language inference. Stance labels
 must be supplied by an annotator or an external classifier, and decision
-strengths are not calibrated. Calibration, experiments, results, and the
-dashboard are intentionally not implemented yet. See `docs/data.md` for dataset
-semantics, `docs/retrieval.md` for retriever interfaces, `docs/evaluation.md`
-for metric definitions, and `docs/evidence.md` for evidence-assessment
-semantics and limitations.
+strengths are not calibrated.
+
+Phase 6 provides abstention and decision evaluation:
+
+- thresholded abstention over uncalibrated answer confidence;
+- decision records with coverage, selective accuracy, and selective risk;
+- risk-targeted threshold selection and risk-coverage curves for development
+  data;
+- Brier score and expected calibration error for surfaced answers;
+- JSON-serializable decision and calibration outputs.
+
+Threshold selection requires development data; no threshold has been fitted on
+SciFact, and confidence values are not claimed to be calibrated probabilities.
+Experiment orchestration, reporting, and the dashboard are intentionally not
+implemented yet. See `docs/data.md` for dataset semantics, `docs/retrieval.md`
+for retriever interfaces, `docs/evaluation.md` for retrieval metrics,
+`docs/evidence.md` for evidence-assessment semantics, and
+`docs/uncertainty.md` for abstention and calibration limitations.
 
 ## Planned project layout
 
