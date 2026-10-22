@@ -2,10 +2,10 @@
 
 **Uncertainty-aware evidence evaluation and abstention for retrieval-augmented generation.**
 
-> **Project status: Phase 2 (dataset layer).**
-> No benchmark results, retrieval baselines, abstention models, or dashboard
-> results exist yet. Claims in this repository will distinguish measured findings
-> from planned work.
+> **Project status: Phase 3 (retrieval baselines).**
+> Retrieval baselines are implemented but not yet evaluated. No benchmark results,
+> evidence assessment, abstention models, or dashboard results exist yet. Claims
+> in this repository will distinguish measured findings from planned work.
 
 ## Research question
 
@@ -30,7 +30,7 @@ planned system separates:
 The core benchmark is designed to run without paid APIs, and offline tests do
 not require dataset or model downloads.
 
-## Current implementation (Phases 1-2)
+## Current implementation (Phases 1-3)
 
 Phase 1 provides the project foundation:
 
@@ -52,9 +52,17 @@ Phase 2 provides the data layer:
 - stable provenance and example IDs for original versus transformed scenarios;
 - a small fictional fixture for offline tests.
 
-Retrieval, evidence assessment, experiments, results, and the dashboard are
-intentionally not implemented yet. See `docs/data.md` for schema details, label
-semantics, transformation assumptions, and limitations.
+Phase 3 provides retrieval baselines:
+
+- an Okapi BM25 baseline with deterministic tokenization;
+- exact dense retrieval over caller-supplied embedding encoders;
+- an optional, lazily imported sentence-transformers adapter;
+- hybrid reciprocal rank fusion with configurable candidate depth;
+- deterministic doc-ID tie-breaking and strict component-result validation.
+
+Evidence assessment, retrieval metrics, experiments, results, and the dashboard
+are intentionally not implemented yet. See `docs/data.md` for dataset semantics
+and `docs/retrieval.md` for retriever interfaces, assumptions, and limitations.
 
 ## Planned project layout
 

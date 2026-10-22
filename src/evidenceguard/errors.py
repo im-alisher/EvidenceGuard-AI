@@ -13,3 +13,7 @@ class ConfigError(EvidenceGuardError):
 
 class DataValidationError(EvidenceGuardError):
     """Raised when a dataset or benchmark transformation is invalid."""
+
+
+class OptionalDependencyError(EvidenceGuardError):
+    """Raised when an optional retrieval or analysis dependency is unavailable."""
