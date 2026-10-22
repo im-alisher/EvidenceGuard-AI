@@ -2,10 +2,11 @@
 
 **Uncertainty-aware evidence evaluation and abstention for retrieval-augmented generation.**
 
-> **Project status: Phase 3 (retrieval baselines).**
-> Retrieval baselines are implemented but not yet evaluated. No benchmark results,
-> evidence assessment, abstention models, or dashboard results exist yet. Claims
-> in this repository will distinguish measured findings from planned work.
+> **Project status: Phase 4 (retrieval evaluation).**
+> Retrieval baselines and offline retrieval metrics are implemented. No SciFact
+> benchmark results, evidence assessment, abstention models, or dashboard results
+> exist yet. Claims in this repository will distinguish measured findings from
+> planned work.
 
 ## Research question
 
@@ -30,7 +31,7 @@ planned system separates:
 The core benchmark is designed to run without paid APIs, and offline tests do
 not require dataset or model downloads.
 
-## Current implementation (Phases 1-3)
+## Current implementation (Phases 1-4)
 
 Phase 1 provides the project foundation:
 
@@ -60,9 +61,18 @@ Phase 3 provides retrieval baselines:
 - hybrid reciprocal rank fusion with configurable candidate depth;
 - deterministic doc-ID tie-breaking and strict component-result validation.
 
-Evidence assessment, retrieval metrics, experiments, results, and the dashboard
-are intentionally not implemented yet. See `docs/data.md` for dataset semantics
-and `docs/retrieval.md` for retriever interfaces, assumptions, and limitations.
+Phase 4 provides retrieval evaluation:
+
+- Recall@k, Precision@k, Hit@k, MRR@k, MAP@k, and graded nDCG@k;
+- per-query and macro-averaged metrics at configurable cutoffs;
+- explicit skipping of queries without positive relevance judgments;
+- validation of result order, duplicate documents, and corpus membership;
+- JSON-serializable evaluation output for later experiment reporting.
+
+Evidence assessment, calibration, experiments, results, and the dashboard are
+intentionally not implemented yet. See `docs/data.md` for dataset semantics,
+`docs/retrieval.md` for retriever interfaces, and `docs/evaluation.md` for metric
+definitions and limitations.
 
 ## Planned project layout
 

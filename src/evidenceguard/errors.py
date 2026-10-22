@@ -17,3 +17,7 @@ class DataValidationError(EvidenceGuardError):
 
 class OptionalDependencyError(EvidenceGuardError):
     """Raised when an optional retrieval or analysis dependency is unavailable."""
+
+
+class EvaluationError(EvidenceGuardError):
+    """Raised when retrieval or benchmark evaluation cannot be performed."""

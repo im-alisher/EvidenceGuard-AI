@@ -127,8 +127,8 @@ results = hybrid.retrieve(dataset.queries[0], top_k=20)
 ```
 
 A dense component requires an encoder implementation and explicit model
-acquisition. Infrastructure beyond exact NumPy search, retrieval metrics, and
-end-to-end evaluation is intentionally deferred to later phases.
+acquisition. Approximate nearest-neighbor infrastructure and end-to-end evidence
+evaluation are intentionally deferred to later phases.
 
 ## Limitations
 
