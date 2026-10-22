@@ -24,8 +24,8 @@ artifacts.
 
 ```powershell
 python -m pytest
-python -m ruff check src tests
-python -m ruff format --check src tests
+python -m ruff check src tests dashboard
+python -m ruff format --check src tests dashboard
 python -m mypy src
 ```
 

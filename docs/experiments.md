@@ -107,4 +107,4 @@ directly and write it with `write_experiment_result`.
 - No SciFact run is included in the repository.
 - `seed` is recorded for provenance; BM25 execution itself is deterministic and
   does not use random sampling.
-- Reporting and dashboard rendering are separate phases.
+- Reporting and dashboard rendering are documented in `docs/reporting.md`.

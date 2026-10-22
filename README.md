@@ -2,12 +2,12 @@
 
 **Uncertainty-aware evidence evaluation and abstention for retrieval-augmented generation.**
 
-> **Project status: Phase 7 (experiment runner).**
+> **Project status: Phase 8 (reporting and dashboard).**
 > Retrieval, evidence assessment, thresholded abstention, decision
-> evaluation, and configuration-driven retrieval runs are implemented. No
-> SciFact benchmark results, reporting outputs, or dashboard results exist yet.
-> Claims in this repository will distinguish measured findings from planned
-> work.
+> evaluation, reproducible retrieval runs, report exports, and an optional
+> local dashboard are implemented. No SciFact benchmark results or generated
+> report artifacts are bundled. Claims in this repository distinguish measured
+> findings from planned work.
 
 ## Research question
 
@@ -32,7 +32,7 @@ planned system separates:
 The core benchmark is designed to run without paid APIs, and offline tests do
 not require dataset or model downloads.
 
-## Current implementation (Phases 1-7)
+## Current implementation (Phases 1-8)
 
 Phase 1 provides the project foundation:
 
@@ -103,12 +103,20 @@ Phase 7 provides reproducible experiment orchestration:
 - deterministic artifact writing with explicit overwrite protection;
 - a `python -m evidenceguard.experiments` command-line entry point.
 
-Reporting and the dashboard are intentionally not implemented yet. See
-`docs/data.md` for dataset semantics, `docs/retrieval.md` for retriever
+Phase 8 provides reporting and an optional local dashboard:
+
+- strict loading and validation of versioned run artifacts;
+- deterministic Markdown reports with measured and unmeasured sections;
+- CSV export of aggregate retrieval metrics;
+- an optional Streamlit viewer for uploaded JSON artifacts;
+- no fabricated sections, inferred results, or bundled benchmark outputs.
+
+See `docs/data.md` for dataset semantics, `docs/retrieval.md` for retriever
 interfaces, `docs/evaluation.md` for retrieval metrics, `docs/evidence.md` for
 evidence-assessment semantics, `docs/uncertainty.md` for abstention and
-calibration limitations, and `docs/experiments.md` for run configuration and
-artifact schemas.
+calibration limitations, `docs/experiments.md` for run configuration and
+artifact schemas, and `docs/reporting.md` for validation, exports, and the
+dashboard.
 
 ## Planned project layout
 
@@ -176,8 +184,8 @@ Optional extras can be combined:
 python -m pip install -e ".[dev,dense,analysis,dashboard]"
 ```
 
-Do not install optional extras until the corresponding phase is implemented and
-reviewed.
+Install only the optional extras needed for your work. The reporting and export
+functions do not require the dashboard extra.
 
 ## Running tests
 
@@ -196,8 +204,8 @@ python -m pytest --cov=evidenceguard --cov-report=term-missing
 Static checks, once their tools are installed:
 
 ```powershell
-python -m ruff check src tests
-python -m ruff format --check src tests
+python -m ruff check src tests dashboard
+python -m ruff format --check src tests dashboard
 python -m mypy src
 ```
 
@@ -229,6 +237,29 @@ python -m evidenceguard.experiments configs/retrieval-smoke.yaml
 
 The command writes a JSON artifact under `reports/runs/`. It does not download
 data or models.
+
+## Reporting
+
+Load an artifact, render Markdown, or export aggregate retrieval metrics:
+
+```python
+from evidenceguard.reporting import (
+    load_run_artifact,
+    write_markdown_report,
+    write_retrieval_csv,
+)
+
+artifact = load_run_artifact("reports/runs/retrieval-smoke.json")
+write_markdown_report(artifact, "reports/retrieval-smoke.md")
+write_retrieval_csv(artifact, "reports/retrieval-smoke.csv")
+```
+
+The optional dashboard reads uploaded artifacts only:
+
+```powershell
+python -m pip install -e ".[dashboard]"
+streamlit run dashboard/app.py
+```
 
 ## Dataset and licensing
 
