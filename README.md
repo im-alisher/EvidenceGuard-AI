@@ -5,9 +5,8 @@
 > **Project status: Phase 8 (reporting and dashboard).**
 > Retrieval, evidence assessment, thresholded abstention, decision
 > evaluation, reproducible retrieval runs, report exports, and an optional
-> local dashboard are implemented. No SciFact benchmark results or generated
-> report artifacts are bundled. Claims in this repository distinguish measured
-> findings from planned work.
+> local dashboard are implemented. Baseline SciFact retrieval results (BM25, dense, and hybrid RRF) are included under reports/. No answer generation or verifier results exist yet.
+> Claims in this repository distinguish measured findings from planned work.
 
 ## Research question
 
@@ -109,7 +108,7 @@ Phase 8 provides reporting and an optional local dashboard:
 - deterministic Markdown reports with measured and unmeasured sections;
 - CSV export of aggregate retrieval metrics;
 - an optional Streamlit viewer for uploaded JSON artifacts;
-- no fabricated sections, inferred results, or bundled benchmark outputs.
+- no fabricated sections or inferred results.
 
 See `docs/data.md` for dataset semantics, `docs/retrieval.md` for retriever
 interfaces, `docs/evaluation.md` for retrieval metrics, `docs/evidence.md` for
@@ -118,7 +117,7 @@ calibration limitations, `docs/experiments.md` for run configuration and
 artifact schemas, and `docs/reporting.md` for validation, exports, and the
 dashboard.
 
-## Planned project layout
+## Project layout
 
 ```text
 EvidenceGuard-AI/
@@ -126,7 +125,6 @@ EvidenceGuard-AI/
   datasets/                 local dataset location (raw data is not committed)
   docs/                     setup and research documentation
   reports/                  generated experiment outputs and report material
-  scripts/                  manual download and reproduction utilities
   src/evidenceguard/
     data/                   dataset schemas, adapters, and transformations
     retrieval/              BM25, dense, and hybrid retrieval
@@ -142,8 +140,6 @@ EvidenceGuard-AI/
   CONTRIBUTING.md
   LICENSE
 ```
-
-Modules are introduced only when their implementation phase begins.
 
 ## Requirements
 
@@ -249,9 +245,9 @@ from evidenceguard.reporting import (
     write_retrieval_csv,
 )
 
-artifact = load_run_artifact("reports/runs/retrieval-smoke.json")
-write_markdown_report(artifact, "reports/retrieval-smoke.md")
-write_retrieval_csv(artifact, "reports/retrieval-smoke.csv")
+artifact = load_run_artifact("reports/runs/scifact-bm25.json")
+write_markdown_report(artifact, "reports/scifact-bm25.md", overwrite=True)
+write_retrieval_csv(artifact, "reports/scifact-bm25.csv", overwrite=True)
 ```
 
 The optional dashboard reads uploaded artifacts only:
@@ -261,9 +257,26 @@ python -m pip install -e ".[dashboard]"
 streamlit run dashboard/app.py
 ```
 
+## Baseline results
+
+Macro-averaged retrieval metrics on the SciFact BEIR test split (300 evaluated
+queries), rounded to three decimals from the committed reports:
+
+| Retriever | Recall@10 | nDCG@10 | MRR@10 | Hit@10 | Full reports |
+| --- | ---: | ---: | ---: | ---: | --- |
+| BM25 | 0.776 | 0.652 | 0.618 | 0.797 | [Markdown](reports/scifact-bm25.md), [CSV](reports/scifact-bm25.csv), [JSON](reports/runs/scifact-bm25.json) |
+| Dense (all-MiniLM-L6-v2) | 0.783 | 0.645 | 0.605 | 0.793 | [Markdown](reports/scifact-dense.md), [CSV](reports/scifact-dense.csv), [JSON](reports/runs/scifact-dense.json) |
+| Hybrid RRF | 0.839 | 0.697 | 0.654 | 0.853 | [Markdown](reports/scifact-hybrid-rrf.md), [CSV](reports/scifact-hybrid-rrf.csv), [JSON](reports/runs/scifact-hybrid-rrf.json) |
+
+Dense uses `sentence-transformers/all-MiniLM-L6-v2`; hybrid combines BM25 and
+dense with RRF (`rrf_k=60`, candidate depth 10). All runs use cutoff 10 and
+exclude the same 809 queries without positive test judgments. Retrieval relevance
+does not establish answer correctness. No answer generation or verifier results
+have been measured.
+
 ## Dataset and licensing
 
-The planned public benchmark is **SciFact** (Wadden et al., EMNLP 2020):
+The public retrieval benchmark is **SciFact** (Wadden et al., EMNLP 2020):
 
 - SciFact original dataset license: **CC BY-NC 2.0**.
 - The BEIR redistribution is listed as **CC BY-SA 4.0**.
