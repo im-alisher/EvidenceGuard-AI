@@ -1,0 +1,2 @@
+cutoff,query_count,mean_recall,mean_precision,mean_reciprocal_rank,mean_average_precision,mean_ndcg,hit_rate
+10,300,0.775667,0.085333,0.618365,0.607113,0.652285,0.796667

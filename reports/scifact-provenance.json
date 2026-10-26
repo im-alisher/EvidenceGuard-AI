@@ -1,0 +1,26 @@
+{
+  "candidate_k": 10,
+  "cutoffs": [
+    10
+  ],
+  "dataset_md5": "5f7d1de60b170fc8027bb7898e2efca1",
+  "dataset_url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
+  "device": "cpu",
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "model_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "packages": {
+    "evidenceguard-ai": "0.1.0",
+    "numpy": "2.5.4",
+    "pytest": "9.1.1",
+    "rank-bm25": "0.2.2",
+    "sentence-transformers": "6.2.0",
+    "torch": "2.14.1",
+    "transformers": "5.20.2"
+  },
+  "python": "3.13.14",
+  "rrf_k": 60,
+  "seed": 13,
+  "source_commit": "af65c4841c42060deec394ad1ee09c1e4899eb1c",
+  "split": "test",
+  "top_k": 10
+}

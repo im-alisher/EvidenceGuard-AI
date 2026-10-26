@@ -1,0 +1,13 @@
+version: 1
+name: scifact-bm25
+seed: 13
+paths:
+  datasets: datasets
+  outputs: reports/runs
+logging:
+  level: INFO
+experiment:
+  dataset: datasets/raw/scifact
+  retriever: bm25
+  cutoffs: [10]
+  top_k: 10
